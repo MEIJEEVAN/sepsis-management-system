@@ -1,0 +1,193 @@
+/* ============================================
+   Tokyo Night Theme for Sepsis Management System
+   Palette:
+   - bg: #1a1b26 (night)
+   - fg: #c0caf5 (foreground)
+   - blue: #7aa2f7
+   - purple: #bb9af7
+   - cyan: #7dcfff
+   - red: #f7768e
+   - green: #9ece6a
+   - yellow: #e0af68
+   - gray: #565f89
+   ============================================ */
+
+:root {
+  --tokyo-bg: #1a1b26;
+  --tokyo-bg-alt: #16161e;
+  --tokyo-fg: #c0caf5;
+  --tokyo-blue: #7aa2f7;
+  --tokyo-purple: #bb9af7;
+  --tokyo-cyan: #7dcfff;
+  --tokyo-red: #f7768e;
+  --tokyo-green: #9ece6a;
+  --tokyo-yellow: #e0af68;
+  --tokyo-gray: #565f89;
+  --tokyo-dark-line: #292e42;
+  --tokyo-hover: #24283b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--tokyo-bg);
+  color: var(--tokyo-fg);
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Navbar */
+nav {
+  background-color: var(--tokyo-bg-alt);
+  padding: 12px 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+nav a {
+  color: var(--tokyo-fg);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+nav a:hover {
+  background: var(--tokyo-hover);
+  color: var(--tokyo-blue);
+}
+
+nav a.router-link-active {
+  background: var(--tokyo-blue);
+  color: var(--tokyo-bg);
+}
+
+nav button {
+  background-color: var(--tokyo-red);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+nav button:hover {
+  background-color: #e05a75;
+}
+
+/* Forms */
+form {
+  background: var(--tokyo-bg-alt);
+  padding: 30px;
+  max-width: 400px;
+  margin: 40px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--tokyo-dark-line);
+}
+
+form h1 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--tokyo-purple);
+}
+
+input,
+button {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border: 1px solid var(--tokyo-gray);
+  border-radius: 4px;
+  font-size: 16px;
+  background: var(--tokyo-bg);
+  color: var(--tokyo-fg);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--tokyo-blue);
+  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+}
+
+button[type="submit"] {
+  background-color: var(--tokyo-blue);
+  color: var(--tokyo-bg);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background 0.2s;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--tokyo-cyan);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--tokyo-bg-alt);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--tokyo-dark-line);
+}
+
+th {
+  background-color: var(--tokyo-hover);
+  font-weight: 600;
+  color: var(--tokyo-blue);
+}
+
+tr:hover {
+  background-color: var(--tokyo-hover);
+}
+
+/* Alerts / Pre blocks */
+pre {
+  background: var(--tokyo-bg-alt);
+  padding: 15px;
+  border-left: 4px solid var(--tokyo-cyan);
+  border-radius: 4px;
+  overflow-x: auto;
+  color: var(--tokyo-fg);
+  margin-top: 20px;
+}
+
+/* Utility */
+.error-message {
+  color: var(--tokyo-red);
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.success-message {
+  color: var(--tokyo-green);
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+}
