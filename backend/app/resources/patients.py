@@ -1,68 +1,98 @@
-"""Patient management endpoints."""
+"""Patient endpoints."""
 
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
-from marshmallow import ValidationError
+from typing import Any
 
-from app.extensions import db
-from app.models.patient import Patient
-from app.schemas.patient import PatientSchema, PatientUpdateSchema
-from app.utils.decorators import role_required
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import text
 
-patients_bp = Blueprint("patients", __name__, url_prefix="/api/patients")
-patient_schema = PatientSchema()
-patients_schema = PatientSchema(many=True)
+from ..extensions import db
+from ..models import Alert, LabResult, Patient, SepsisEpisode, VitalSign
+from ..schemas import PatientSchema
+from ..utils.decorators import role_required
+
+bp = Blueprint("patients", __name__, url_prefix="/api/patients")
+
+_LIST_SQL = text(
+    """
+    SELECT p.*, s.temperature, s.heart_rate, s.systolic_bp, s.diastolic_bp, s.spo2,
+           s.lactate, s.episode_stage, s.episode_outcome
+    FROM patients p
+    LEFT JOIN v_patient_current_status s ON s.patient_id = p.id
+    ORDER BY p.id
+    """
+)
 
 
-@patients_bp.get("")
+def _set_audit_user() -> None:
+    """Expose the acting user to the audit trigger for this transaction."""
+    db.session.execute(
+        text("SELECT set_config('app.user_id', :uid, true)"), {"uid": str(get_jwt_identity())}
+    )
+
+
+@bp.get("")
 @jwt_required()
-def get_patients():
-    """Return list of all patients."""
-    patients = Patient.query.order_by(Patient.admission_date.desc()).all()
-    return jsonify(patients_schema.dump(patients)), 200
+def list_patients() -> Any:
+    """List all patients with their current status."""
+    return jsonify([dict(r) for r in db.session.execute(_LIST_SQL).mappings()])
 
 
-@patients_bp.post("")
-@jwt_required()
+@bp.post("")
 @role_required(["admin", "clinician"])
-def create_patient():
-    """Create a new patient."""
-    try:
-        data = patient_schema.load(request.get_json())
-    except ValidationError as err:
-        return jsonify({"errors": err.messages}), 400
-
+def create_patient() -> Any:
+    """Admit a patient."""
+    data = PatientSchema().load(request.get_json(silent=True) or {})
+    _set_audit_user()
     patient = Patient(**data)
     db.session.add(patient)
     db.session.commit()
-    return jsonify(patient_schema.dump(patient)), 201
+    return jsonify(patient.to_dict()), 201
 
 
-@patients_bp.get("/<int:patient_id>")
+@bp.get("/<int:patient_id>")
 @jwt_required()
-def get_patient(patient_id):
-    """Return a single patient by ID."""
-    patient = db.session.get(Patient, patient_id)
-    if patient is None:
-        return jsonify({"message": "Patient not found"}), 404
-    return jsonify(patient_schema.dump(patient)), 200
+def get_patient(patient_id: int) -> Any:
+    """Return one patient."""
+    return jsonify(db.get_or_404(Patient, patient_id).to_dict())
 
 
-@patients_bp.put("/<int:patient_id>")
-@jwt_required()
+@bp.put("/<int:patient_id>")
 @role_required(["admin", "clinician"])
-def update_patient(patient_id):
-    """Update patient details."""
-    patient = db.session.get(Patient, patient_id)
-    if patient is None:
-        return jsonify({"message": "Patient not found"}), 404
-
-    try:
-        data = PatientUpdateSchema().load(request.get_json(), partial=True)
-    except ValidationError as err:
-        return jsonify({"errors": err.messages}), 400
-
+def update_patient(patient_id: int) -> Any:
+    """Update a patient (partial updates allowed)."""
+    patient = db.get_or_404(Patient, patient_id)
+    data = PatientSchema(partial=True).load(request.get_json(silent=True) or {})
+    _set_audit_user()
     for key, value in data.items():
         setattr(patient, key, value)
     db.session.commit()
-    return jsonify(patient_schema.dump(patient)), 200
+    return jsonify(patient.to_dict())
+
+
+@bp.get("/<int:patient_id>/summary")
+@jwt_required()
+def patient_summary(patient_id: int) -> Any:
+    """Return current status, recent vitals/labs, episodes and alerts."""
+    patient = db.get_or_404(Patient, patient_id)
+    current = (
+        db.session.execute(
+            text("SELECT * FROM v_patient_current_status WHERE patient_id = :id"),
+            {"id": patient_id},
+        )
+        .mappings()
+        .first()
+    )
+
+    def recent(model: Any, order_col: Any, limit: int) -> list[dict[str, Any]]:
+        stmt = db.select(model).filter_by(patient_id=patient_id).order_by(order_col.desc())
+        return [r.to_dict() for r in db.session.scalars(stmt.limit(limit))]
+
+    return jsonify(
+        patient=patient.to_dict(),
+        current=dict(current) if current else None,
+        vitals=recent(VitalSign, VitalSign.recorded_at, 20),
+        labs=recent(LabResult, LabResult.recorded_at, 10),
+        episodes=recent(SepsisEpisode, SepsisEpisode.detected_at, 20),
+        alerts=recent(Alert, Alert.created_at, 5),
+    )

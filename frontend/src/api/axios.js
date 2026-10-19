@@ -1,43 +1,37 @@
-import axios from "axios";
-import router from "../router";
+import axios from 'axios'
+import { useAuthStore } from '../stores/auth'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-});
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL })
+let refreshing = null
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+  const auth = useAuthStore()
+  if (auth.accessToken) config.headers.Authorization = `Bearer ${auth.accessToken}`
+  return config
+})
 
 api.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        try {
-          const { data } = await axios.post(
-            `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/auth/refresh`,
-            {},
-            { headers: { Authorization: `Bearer ${refreshToken}` } },
-          );
-          localStorage.setItem("access_token", data.access_token);
-          originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-          return api(originalRequest);
-        } catch {
-          localStorage.clear();
-          router.push("/login");
-        }
+    const original = error.config
+    const auth = useAuthStore()
+    if (error.response?.status === 401 && !original._retried && auth.refreshToken) {
+      original._retried = true
+      try {
+        refreshing = refreshing || auth.refresh().finally(() => (refreshing = null))
+        const token = await refreshing
+        original.headers.Authorization = `Bearer ${token}`
+        return api(original)
+      } catch (e) {
+        /* fall through to logout */
       }
     }
-    return Promise.reject(error);
+    if (error.response?.status === 401) {
+      auth.logout()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
   },
-);
+)
 
-export default api;
+export default api

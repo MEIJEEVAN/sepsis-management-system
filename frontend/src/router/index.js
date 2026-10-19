@@ -1,42 +1,23 @@
-import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "../stores/auth";
-
-const routes = [
-  {
-    path: "/login",
-    name: "Login",
-    component: () => import("../views/LoginView.vue"),
-  },
-  { path: "/", redirect: "/dashboard" },
-  {
-    path: "/dashboard",
-    name: "Dashboard",
-    component: () => import("../views/DashboardView.vue"),
-  },
-  {
-    path: "/patients",
-    name: "Patients",
-    component: () => import("../views/PatientsView.vue"),
-  },
-  {
-    path: "/patients/:id",
-    name: "PatientDetail",
-    component: () => import("../views/PatientDetailView.vue"),
-  },
-];
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import LoginView from '../views/LoginView.vue'
+import DashboardView from '../views/DashboardView.vue'
+import PatientsView from '../views/PatientsView.vue'
+import PatientDetailView from '../views/PatientDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
-});
+  routes: [
+    { path: '/login', component: LoginView },
+    { path: '/', component: DashboardView, meta: { auth: true } },
+    { path: '/patients', component: PatientsView, meta: { auth: true } },
+    { path: '/patients/:id', component: PatientDetailView, meta: { auth: true } },
+  ],
+})
 
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();
-  if (to.name !== "Login" && !auth.isAuthenticated) {
-    next({ name: "Login" });
-  } else {
-    next();
-  }
-});
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.meta.auth && !auth.isAuthenticated) return '/login'
+})
 
-export default router;
+export default router

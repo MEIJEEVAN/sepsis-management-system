@@ -1,30 +1,31 @@
-<template>
-  <form @submit.prevent="handleLogin">
-    <h1>Login</h1>
-    <input v-model="email" type="email" placeholder="Email" required />
-    <input v-model="password" type="password" placeholder="Password" required />
-    <button type="submit">Login</button>
-    <p v-if="error" style="color: red">{{ error }}</p>
-  </form>
-</template>
-
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "../stores/auth";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
-const email = ref("");
-const password = ref("");
-const error = ref("");
-const router = useRouter();
-const auth = useAuthStore();
+const auth = useAuthStore()
+const router = useRouter()
+const email = ref('admin@sepsis.local')
+const password = ref('')
+const error = ref('')
 
-async function handleLogin() {
+async function submit() {
+  error.value = ''
   try {
-    await auth.login({ email: email.value, password: password.value });
-    router.push("/dashboard");
-  } catch (err) {
-    error.value = err.response?.data?.message || "Login failed";
+    await auth.login(email.value, password.value)
+    router.push('/')
+  } catch (e) {
+    error.value = e.response?.data?.error || 'Login failed'
   }
 }
 </script>
+
+<template>
+  <form class="card form" style="max-width:380px;margin:4rem auto" @submit.prevent="submit">
+    <h2>Sign in</h2>
+    <label>Email<input v-model="email" type="email" required /></label>
+    <label>Password<input v-model="password" type="password" required /></label>
+    <p v-if="error" class="error">{{ error }}</p>
+    <button type="submit">Login</button>
+  </form>
+</template>

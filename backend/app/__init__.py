@@ -1,37 +1,38 @@
-"""Flask application factory."""
+"""Flask application factory for the Sepsis Management System."""
 
-from flask import Flask
+from flask import Flask, jsonify
+from marshmallow import ValidationError
+from sqlalchemy.exc import DataError, IntegrityError
 
-from app.config import Config
-from app.extensions import db, migrate, jwt, cors
+from .config import Config
+from .extensions import cors, db, jwt, migrate
+from .utils.json import AppJSONProvider
 
 
-def create_app(config_class=Config):
-    """Create and configure the Flask application."""
+def create_app(config_class: type[Config] = Config) -> Flask:
+    """Build and configure the Flask application."""
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.json = AppJSONProvider(app)
 
-    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
 
-    # Register blueprints
-    from app.resources.auth import auth_bp
-    from app.resources.patients import patients_bp
-    from app.resources.vitals import vitals_bp
-    from app.resources.labs import labs_bp
-    from app.resources.sepsis import sepsis_bp
-    from app.resources.alerts import alerts_bp
-    from app.resources.protocols import protocols_bp
+    from .resources import register_blueprints
 
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(patients_bp)
-    app.register_blueprint(vitals_bp)
-    app.register_blueprint(labs_bp)
-    app.register_blueprint(sepsis_bp)
-    app.register_blueprint(alerts_bp)
-    app.register_blueprint(protocols_bp)
+    register_blueprints(app)
+
+    @app.errorhandler(ValidationError)
+    def _validation(err: ValidationError):  # type: ignore[no-untyped-def]
+        return jsonify(error="validation failed", details=err.messages), 422
+
+    @app.errorhandler(IntegrityError)
+    @app.errorhandler(DataError)
+    def _database(err: Exception):  # type: ignore[no-untyped-def]
+        db.session.rollback()
+        detail = str(getattr(err, "orig", err)).splitlines()[0]
+        return jsonify(error="database rejected the data", detail=detail), 400
 
     return app

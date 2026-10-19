@@ -1,193 +1,39 @@
-/* ============================================
-   Tokyo Night Theme for Sepsis Management System
-   Palette:
-   - bg: #1a1b26 (night)
-   - fg: #c0caf5 (foreground)
-   - blue: #7aa2f7
-   - purple: #bb9af7
-   - cyan: #7dcfff
-   - red: #f7768e
-   - green: #9ece6a
-   - yellow: #e0af68
-   - gray: #565f89
-   ============================================ */
-
 :root {
-  --tokyo-bg: #1a1b26;
-  --tokyo-bg-alt: #16161e;
-  --tokyo-fg: #c0caf5;
-  --tokyo-blue: #7aa2f7;
-  --tokyo-purple: #bb9af7;
-  --tokyo-cyan: #7dcfff;
-  --tokyo-red: #f7768e;
-  --tokyo-green: #9ece6a;
-  --tokyo-yellow: #e0af68;
-  --tokyo-gray: #565f89;
-  --tokyo-dark-line: #292e42;
-  --tokyo-hover: #24283b;
+  --bg: #1a1b26; --bg-2: #24283b; --bg-3: #2f334d; --fg: #c0caf5; --muted: #787c99;
+  --blue: #7aa2f7; --purple: #bb9af7; --red: #f7768e; --green: #9ece6a;
+  --yellow: #e0af68; --orange: #ff9e64;
 }
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--tokyo-bg);
-  color: var(--tokyo-fg);
-  padding: 20px;
-  min-height: 100vh;
-}
-
-/* Navbar */
-nav {
-  background-color: var(--tokyo-bg-alt);
-  padding: 12px 20px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-nav a {
-  color: var(--tokyo-fg);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-
-nav a:hover {
-  background: var(--tokyo-hover);
-  color: var(--tokyo-blue);
-}
-
-nav a.router-link-active {
-  background: var(--tokyo-blue);
-  color: var(--tokyo-bg);
-}
-
-nav button {
-  background-color: var(--tokyo-red);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: auto;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-nav button:hover {
-  background-color: #e05a75;
-}
-
-/* Forms */
-form {
-  background: var(--tokyo-bg-alt);
-  padding: 30px;
-  max-width: 400px;
-  margin: 40px auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--tokyo-dark-line);
-}
-
-form h1 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: var(--tokyo-purple);
-}
-
-input,
-button {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 15px;
-  border: 1px solid var(--tokyo-gray);
-  border-radius: 4px;
-  font-size: 16px;
-  background: var(--tokyo-bg);
-  color: var(--tokyo-fg);
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--tokyo-blue);
-  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
-}
-
-button[type="submit"] {
-  background-color: var(--tokyo-blue);
-  color: var(--tokyo-bg);
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: background 0.2s;
-}
-
-button[type="submit"]:hover {
-  background-color: var(--tokyo-cyan);
-}
-
-/* Tables */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--tokyo-bg-alt);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-th,
-td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--tokyo-dark-line);
-}
-
-th {
-  background-color: var(--tokyo-hover);
-  font-weight: 600;
-  color: var(--tokyo-blue);
-}
-
-tr:hover {
-  background-color: var(--tokyo-hover);
-}
-
-/* Alerts / Pre blocks */
-pre {
-  background: var(--tokyo-bg-alt);
-  padding: 15px;
-  border-left: 4px solid var(--tokyo-cyan);
-  border-radius: 4px;
-  overflow-x: auto;
-  color: var(--tokyo-fg);
-  margin-top: 20px;
-}
-
-/* Utility */
-.error-message {
-  color: var(--tokyo-red);
-  font-size: 14px;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.success-message {
-  color: var(--tokyo-green);
-  font-size: 14px;
-  margin-bottom: 10px;
-  text-align: center;
-}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font-family: Inter, system-ui, sans-serif; }
+a { color: var(--blue); text-decoration: none; }
+h1, h2, h3 { color: var(--purple); margin-top: 0; }
+.container { max-width: 1200px; margin: 0 auto; padding: 1.25rem; }
+button { background: var(--blue); color: var(--bg); border: 0; border-radius: 6px;
+  padding: .5rem 1rem; font-weight: 600; cursor: pointer; }
+button:hover { filter: brightness(1.1); }
+button.secondary { background: var(--bg-3); color: var(--fg); }
+nav button { width: auto; }
+input { width: 100%; padding: .6rem; margin: .3rem 0 1rem; background: var(--bg);
+  color: var(--fg); border: 1px solid var(--bg-3); border-radius: 6px; }
+.form button { width: 100%; }
+.card { background: var(--bg-2); border: 1px solid var(--bg-3); border-radius: 10px; padding: 1rem; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.layout { display: grid; gap: 1rem; grid-template-columns: 2fr 1fr; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: .5rem; border-bottom: 1px solid var(--bg-3); }
+tr.clickable:hover { background: var(--bg-3); cursor: pointer; }
+.muted { color: var(--muted); font-size: .85rem; }
+.error { color: var(--red); }
+.badge { padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.sev-critical, .risk-critical { --c: var(--red); }
+.sev-high, .risk-high { --c: var(--orange); }
+.sev-medium, .risk-medium { --c: var(--yellow); }
+.badge[class*='sev-'] { background: var(--c); color: var(--bg); }
+.patient-card.at-risk { border-color: var(--c); box-shadow: 0 0 0 1px var(--c); }
+.alert-item { border-left: 4px solid var(--c); background: var(--bg-2); padding: .6rem .8rem;
+  margin-bottom: .5rem; border-radius: 6px; }
+.alert-list { max-height: 70vh; overflow-y: auto; }
+.status-line { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.live { color: var(--green); }

@@ -1,27 +1,20 @@
-"""Vital sign model."""
+"""Vital signs model."""
 
-from datetime import datetime
+from ..extensions import db
+from .base import DictMixin
 
-from app.extensions import db
 
-
-class VitalSign(db.Model):
-    """Patient vital signs at a point in time."""
+class VitalSign(DictMixin, db.Model):
+    """One set of vital signs for a patient."""
 
     __tablename__ = "vital_signs"
-
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(
-        db.Integer, db.ForeignKey("patients.id"), nullable=False, index=True
-    )
-    recorded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    temperature = db.Column(db.Numeric(4, 1))  # °C
-    heart_rate = db.Column(db.Integer)  # bpm
-    respiratory_rate = db.Column(db.Integer)  # breaths/min
-    systolic_bp = db.Column(db.Integer)  # mmHg
-    diastolic_bp = db.Column(db.Integer)  # mmHg
-    spo2 = db.Column(db.Numeric(4, 1))  # %
-    gcs = db.Column(db.Integer)  # 3-15
-    notes = db.Column(db.Text)
-
-    patient = db.relationship("Patient", back_populates="vitals")
+    id = db.Column(db.BigInteger, primary_key=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"), nullable=False)
+    recorded_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+    temperature = db.Column(db.Numeric(4, 1))
+    heart_rate = db.Column(db.Integer)
+    respiratory_rate = db.Column(db.Integer)
+    systolic_bp = db.Column(db.Integer)
+    diastolic_bp = db.Column(db.Integer)
+    spo2 = db.Column(db.Numeric(4, 1))
+    gcs = db.Column(db.Integer)

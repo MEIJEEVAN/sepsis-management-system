@@ -1,19 +1,19 @@
 """Audit log model."""
 
-from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
 
-from app.extensions import db
+from ..extensions import db
+from .base import DictMixin
 
 
-class AuditLog(db.Model):
-    """Audit trail for user actions."""
+class AuditLog(DictMixin, db.Model):
+    """An audit trail entry."""
 
     __tablename__ = "audit_logs"
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    id = db.Column(db.BigInteger, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     action = db.Column(db.String(50), nullable=False)
     entity = db.Column(db.String(50), nullable=False)
     entity_id = db.Column(db.Integer)
-    details = db.Column(db.JSON)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    details = db.Column(JSONB)
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())

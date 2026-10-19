@@ -1,30 +1,26 @@
 """User model."""
 
-from datetime import datetime
+from typing import Any
 
-from werkzeug.security import generate_password_hash, check_password_hash
+from ..extensions import db
+from .base import DictMixin
 
-from app.extensions import db
 
-
-class User(db.Model):
-    """Application user (clinician, nurse, admin)."""
+class User(DictMixin, db.Model):
+    """Application user."""
 
     __tablename__ = "users"
-
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
-    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(80), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(120))
-    role = db.Column(db.String(20), nullable=False, default="clinician")
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    role = db.Column(db.String(20), nullable=False, server_default="clinician")
+    is_active = db.Column(db.Boolean, nullable=False, server_default=db.true())
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
 
-    def set_password(self, password: str) -> None:
-        """Hash and set the user's password."""
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password: str) -> bool:
-        """Verify the user's password."""
-        return check_password_hash(self.password_hash, password)
+    def to_dict(self) -> dict[str, Any]:
+        """Return the user without the password hash."""
+        data = super().to_dict()
+        data.pop("password_hash", None)
+        return data

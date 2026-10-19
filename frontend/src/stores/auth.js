@@ -1,33 +1,38 @@
-import { defineStore } from "pinia";
-import api from "../api/axios";
+import { defineStore } from 'pinia'
+import axios from 'axios'
 
-export const useAuthStore = defineStore("auth", {
+const API = import.meta.env.VITE_API_URL
+
+export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    accessToken: localStorage.getItem("access_token") || null,
-    refreshToken: localStorage.getItem("refresh_token") || null,
+    accessToken: localStorage.getItem('access_token'),
+    refreshToken: localStorage.getItem('refresh_token'),
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
   }),
-  getters: {
-    isAuthenticated: (state) => !!state.accessToken,
-  },
+  getters: { isAuthenticated: (s) => !!s.accessToken },
   actions: {
-    async login(credentials) {
-      const { data } = await api.post("/auth/login", credentials);
-      this.accessToken = data.access_token;
-      this.refreshToken = data.refresh_token;
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
-      await this.fetchMe();
+    async login(email, password) {
+      const { data } = await axios.post(`${API}/auth/login`, { email, password })
+      this.accessToken = data.access_token
+      this.refreshToken = data.refresh_token
+      this.user = data.user
+      localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('refresh_token', data.refresh_token)
+      localStorage.setItem('user', JSON.stringify(data.user))
     },
-    async fetchMe() {
-      const { data } = await api.get("/auth/me");
-      this.user = data;
+    async refresh() {
+      const { data } = await axios.post(`${API}/auth/refresh`, null, {
+        headers: { Authorization: `Bearer ${this.refreshToken}` },
+      })
+      this.accessToken = data.access_token
+      localStorage.setItem('access_token', data.access_token)
+      return data.access_token
     },
     logout() {
-      this.user = null;
-      this.accessToken = null;
-      this.refreshToken = null;
-      localStorage.clear();
+      this.accessToken = this.refreshToken = this.user = null
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
     },
   },
-});
+})
